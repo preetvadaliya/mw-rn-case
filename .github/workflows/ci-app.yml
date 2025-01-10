@@ -1,0 +1,43 @@
+# This GitHub Actions workflow is designed to run Continuous Integration (CI) checks for a Biome JS application.
+# The workflow is triggered on push and pull request events to the main branch.
+# It performs the following steps:
+# 1. Checks out the repository to ensure the workflow has access to the codebase.
+# 2. Sets up Node.js version 20 and enables npm caching based on the package-lock.json file to speed up dependency installation.
+# 3. Installs the project dependencies using npm and runs the biome:check script to perform code quality checks.
+#
+# Note: The actions/checkout and actions/setup-node actions are used to facilitate the checkout and Node.js setup processes.
+# The biome:check script is assumed to be defined in the package.json file of the project and is responsible for running code quality checks.
+
+name: "CI: Biome JS | App"
+
+on:
+  push:
+    branches: [ main ]  # Trigger the workflow on push events to the main branch.
+  pull_request:
+    branches: [ main ]  # Trigger the workflow on pull request events targeting the main branch.
+
+permissions:
+  contents: read  # Set the required permissions for the workflow.
+
+jobs:
+  biome-check:
+    name: Biome JS | App
+    runs-on: ubuntu-latest  # Use the latest version of Ubuntu as the runner environment.
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4  # Checkout the repository to the runner.
+        # This step ensures that the workflow has access to the codebase.
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4  # Setup Node.js environment.
+        with:
+          node-version: 20  # Specify the Node.js version to use.
+          cache: npm  # Enable npm caching to speed up dependency installation.
+          cache-dependency-path: package-lock.json  # Use package-lock.json to determine the cache key.
+        # This step sets up the Node.js environment and enables caching to improve workflow performance.
+
+      - name: Install dependencies and run biome:check
+        run: |
+          npm install
+          npm run biome:check
+        # This step installs the necessary dependencies and runs the code quality checks defined in the biome:check script.
