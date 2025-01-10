@@ -23,6 +23,12 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "89d42216-94ad-4d0c-a9df-3bdb08271186"
+      }
+    },
+    "owner": "preetvadaliya"
   }
 }
