@@ -13,35 +13,23 @@
  */
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useNetInfo } from '@react-native-community/netinfo';
+import { addEventListener } from '@react-native-community/netinfo';
 import { AppRoutes } from '@src/AppRoutes';
-import * as SQLite from 'expo-sqlite';
 import type React from 'react';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Alert, Text } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
-import { PRODUCT_TABLE_SQL } from './constants';
 import { useCreateQuote } from './hooks';
 
 export const App: React.FC = () => {
-  const { isConnected } = useNetInfo(); // Use network information to track online/offline status
+  const [isConnected, setIsConnected] = useState(false); // State to track online/offline status
   const { createQuote } = useCreateQuote(); // Hook for creating quotes on the server
 
-  // Effect hook to create SQLite tables on app load
   useEffect(() => {
-    const createTables = async () => {
-      try {
-        // Open SQLite database (if it doesn't exist, it will be created)
-        const db = await SQLite.openDatabaseAsync('test3');
-
-        // Execute SQL to create necessary tables for the app
-        await db.execAsync(PRODUCT_TABLE_SQL);
-      } catch (error) {
-        console.error('Failed to create tables:', error); // Log any error in creating tables
-      }
-    };
-    createTables(); // Call function to create tables
+    addEventListener(({ isConnected, isInternetReachable }) => {
+      setIsConnected(!!(isConnected && isInternetReachable)); // Update the online/offline status
+    });
   }, []);
 
   // Effect hook to sync offline quotes when the device is online
@@ -50,10 +38,8 @@ export const App: React.FC = () => {
       if (isConnected) {
         // Check if there are any offline quotes stored in AsyncStorage
         const offlineQuotes = await AsyncStorage.getItem('offlineQuote');
-
         if (offlineQuotes) {
           const quotes = JSON.parse(offlineQuotes); // Parse the quotes from storage
-
           // Loop through each quote and sync it to the server
           for (const quote of quotes) {
             try {
@@ -64,7 +50,6 @@ export const App: React.FC = () => {
               console.error('Failed to sync quote:', error);
             }
           }
-
           // Clear the offline quotes from AsyncStorage after syncing
           await AsyncStorage.setItem('offlineQuote', JSON.stringify([]));
         }
