@@ -18,6 +18,7 @@
  * />
  */
 
+import React from 'react';
 import { Button, Text, View } from 'react-native';
 
 type PaginationProps = {
@@ -40,10 +41,21 @@ type PaginationProps = {
    * Function to navigate to the previous page.
    */
   prevPage: () => void;
+
+  /**
+   * Total number of items across all pages.
+   */
+  totalItems: number;
+
+  /**
+   * Number of items per page.
+   */
+  perPage: number;
 };
 
 export const Pagination: React.FC<PaginationProps> = (props) => {
-  const { totalPage, currentPage, prevPage, nextPage } = props;
+  const { totalPage, currentPage, totalItems, perPage, prevPage, nextPage } =
+    props;
   return (
     <View
       style={{
@@ -53,10 +65,17 @@ export const Pagination: React.FC<PaginationProps> = (props) => {
         padding: 10
       }}
     >
-      {/* Current page and total pages display */}
-      <Text>
-        {currentPage} of {totalPage}
-      </Text>
+      <View style={{ flexDirection: 'row', gap: 5 }}>
+        {/* Current page and total pages display */}
+        <Text style={{ fontSize: 12 }}>
+          Page {currentPage} of {totalPage}
+        </Text>
+
+        <Text style={{ fontSize: 12 }}>
+          Item {(currentPage - 1) * perPage + 1} to{' '}
+          {Math.min(currentPage * perPage, totalItems)} of {totalItems}
+        </Text>
+      </View>
 
       {/* Navigation buttons */}
       <View style={{ flexDirection: 'row', gap: 10 }}>
@@ -74,3 +93,5 @@ export const Pagination: React.FC<PaginationProps> = (props) => {
     </View>
   );
 };
+
+export const PaginationMemo = React.memo(Pagination);
