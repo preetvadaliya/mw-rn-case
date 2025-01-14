@@ -43,7 +43,10 @@ export const QuotePagination: React.FC<QuotePaginationProps> = (props) => {
 
   // Fetch quotes for the current page
   const fetchQuotes = useCallback(
-    async (page: number) => {
+    async (page: number, refresh?: boolean) => {
+      if (pages[page]?.quotes && !refresh) {
+        return;
+      }
       try {
         setLoading(true);
         setError(null);
@@ -97,7 +100,7 @@ export const QuotePagination: React.FC<QuotePaginationProps> = (props) => {
           // Pull-to-refresh control
           <RefreshControl
             refreshing={loading}
-            onRefresh={() => fetchQuotes(pageNumber)}
+            onRefresh={() => fetchQuotes(pageNumber, true)}
           />
         }
         ListEmptyComponent={
