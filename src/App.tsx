@@ -13,13 +13,13 @@
  */
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { addEventListener } from '@react-native-community/netinfo';
-import { AppRoutes } from '@src/AppRoutes';
+import * as NetInfo from '@react-native-community/netinfo';
 import type React from 'react';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Alert, Text } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
+import { AppRoutes } from './AppRoutes';
 import { useCreateQuote } from './hooks';
 
 export const App: React.FC = () => {
@@ -27,36 +27,37 @@ export const App: React.FC = () => {
   const { createQuote } = useCreateQuote(); // Hook for creating quotes on the server
 
   useEffect(() => {
-    addEventListener(({ isConnected, isInternetReachable }) => {
-      setIsConnected(!!(isConnected && isInternetReachable)); // Update the online/offline status
+    const subscription = NetInfo.addEventListener((status) => {
+      setIsConnected(!!status.isConnected); // Update the online/offline status
     });
+    return () => {
+      subscription(); // Unsubscribe from the event listener
+    };
   }, []);
 
-  // Effect hook to sync offline quotes when the device is online
-  useEffect(() => {
-    const syncOfflineQuotes = async () => {
-      if (isConnected) {
-        // Check if there are any offline quotes stored in AsyncStorage
-        const offlineQuotes = await AsyncStorage.getItem('offlineQuote');
-        if (offlineQuotes) {
-          const quotes = JSON.parse(offlineQuotes); // Parse the quotes from storage
-          // Loop through each quote and sync it to the server
-          for (const quote of quotes) {
-            try {
-              await createQuote(quote); // Sync each quote to the server
-            } catch (error) {
-              // If any error occurs while syncing, show an alert and log the error
-              Alert.alert('Failed to sync quote:', (error as Error).message);
-              console.error('Failed to sync quote:', error);
-            }
-          }
-          // Clear the offline quotes from AsyncStorage after syncing
-          await AsyncStorage.setItem('offlineQuote', JSON.stringify([]));
+  const syncOfflineQuotes = useCallback(async () => {
+    const offlineQuotes = await AsyncStorage.getItem('offlineQuote');
+    if (offlineQuotes) {
+      const quotes = JSON.parse(offlineQuotes);
+      if (!Array.isArray(quotes) || quotes.length === 0) return;
+      for (const quote of quotes) {
+        try {
+          const response = await createQuote(quote);
+          Alert.alert('Quote synced successfully', response?.id);
+        } catch (error) {
+          Alert.alert('Failed to sync quote:', (error as Error).message);
+          console.error('Failed to sync quote:', error);
         }
       }
-    };
-    syncOfflineQuotes(); // Call function to sync quotes if connected to the internet
-  }, [isConnected]); // Re-run the effect when the device's connection status changes
+      await AsyncStorage.setItem('offlineQuote', JSON.stringify([]));
+    }
+  }, [createQuote]);
+
+  useEffect(() => {
+    if (isConnected) {
+      syncOfflineQuotes();
+    }
+  }, [isConnected]);
 
   return (
     <SafeAreaProvider>

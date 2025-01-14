@@ -42,8 +42,8 @@ export const useGetProducts = () => {
     setIsLoading(true);
     setError(null);
     try {
-      const { isConnected, isInternetReachable } = await fetchNetInfo();
-      if (isConnected && isInternetReachable) {
+      const { isConnected } = await fetchNetInfo();
+      if (isConnected) {
         const response = await fetch(`${API_URL}${QUERY_PARAMS}`);
         if (!response.ok) {
           throw new Error(`Error ${response.status}: ${response.statusText}`);

@@ -46,9 +46,9 @@ export const useGetQuotes = () => {
     }
 
     // Check network connectivity
-    const { isConnected, isInternetReachable } = await fetchNetInfo();
+    const { isConnected } = await fetchNetInfo();
 
-    if (isConnected && isInternetReachable) {
+    if (isConnected) {
       const controller = new AbortController();
       try {
         // Fetch from server when online

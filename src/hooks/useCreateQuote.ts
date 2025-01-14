@@ -40,8 +40,8 @@ export const useCreateQuote = () => {
   const createQuote = useCallback(
     async (payload: QuoteFormDataType): Promise<Quote | undefined> => {
       // Check if the device is offline
-      const { isConnected, isInternetReachable } = await fetchNetInfo();
-      if (isConnected && isInternetReachable) {
+      const { isConnected } = await fetchNetInfo();
+      if (isConnected) {
         // Create an AbortController to manage fetch timeout or cancellation
         const controller = new AbortController();
         try {
