@@ -22,15 +22,13 @@
  */
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useNetInfo } from '@react-native-community/netinfo';
+import { fetch as fetchNetInfo } from '@react-native-community/netinfo';
 import type { Quote, QuoteFormDataType } from '@src/types';
 import { useCallback } from 'react';
 
 const API_URL = 'http://127.0.0.1:8090/api/collections/quotes/records';
 
 export const useCreateQuote = () => {
-  const { isConnected } = useNetInfo();
-
   /**
    * Handles the creation of a quote.
    * - Stores locally if offline.
@@ -42,12 +40,46 @@ export const useCreateQuote = () => {
   const createQuote = useCallback(
     async (payload: QuoteFormDataType): Promise<Quote | undefined> => {
       // Check if the device is offline
-      if (!isConnected) {
+      const { isConnected, isInternetReachable } = await fetchNetInfo();
+      if (isConnected && isInternetReachable) {
+        // Create an AbortController to manage fetch timeout or cancellation
+        const controller = new AbortController();
+        try {
+          // Send the quote to the server
+          const response = await fetch(API_URL, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload),
+            signal: controller.signal // Attach the AbortController's signal
+          });
+          // Check for non-success HTTP status codes
+          if (!response.ok) {
+            throw new Error(`Error ${response.status}: ${response.statusText}`);
+          }
+          // Parse the response as a Quote object
+          const data: Quote = await response.json();
+          return data;
+        } catch (error) {
+          // Handle fetch abort specifically
+          if ((error as Error).name === 'AbortError') {
+            console.warn('Fetch aborted.');
+          } else {
+            console.error('Error creating quote:', error);
+            throw new Error(
+              `Failed to create quote: ${(error as Error).message}`
+            );
+          }
+        } finally {
+          // Ensure the controller is aborted to clean up resources
+          controller.abort();
+        }
+      } else {
         try {
           // Retrieve existing offline quotes from AsyncStorage
           const offlineQuotes = await AsyncStorage.getItem('offlineQuote');
           const quotes = offlineQuotes ? JSON.parse(offlineQuotes) : [];
-
           // Add the new quote to the offline storage
           quotes.push(payload);
           await AsyncStorage.setItem('offlineQuote', JSON.stringify(quotes));
@@ -57,45 +89,8 @@ export const useCreateQuote = () => {
           throw new Error('Failed to save the quote offline.');
         }
       }
-
-      // Create an AbortController to manage fetch timeout or cancellation
-      const controller = new AbortController();
-
-      try {
-        // Send the quote to the server
-        const response = await fetch(API_URL, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(payload),
-          signal: controller.signal // Attach the AbortController's signal
-        });
-
-        // Check for non-success HTTP status codes
-        if (!response.ok) {
-          throw new Error(`Error ${response.status}: ${response.statusText}`);
-        }
-
-        // Parse the response as a Quote object
-        const data: Quote = await response.json();
-        return data;
-      } catch (error) {
-        // Handle fetch abort specifically
-        if ((error as Error).name === 'AbortError') {
-          console.warn('Fetch aborted.');
-        } else {
-          console.error('Error creating quote:', error);
-          throw new Error(
-            `Failed to create quote: ${(error as Error).message}`
-          );
-        }
-      } finally {
-        // Ensure the controller is aborted to clean up resources
-        controller.abort();
-      }
     },
-    [isConnected] // Dependency array ensures this function updates when connectivity changes
+    []
   );
 
   return { createQuote };

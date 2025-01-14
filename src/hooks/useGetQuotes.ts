@@ -28,6 +28,8 @@ type ApiResponse = {
   page: number;
   items: Quote[];
   totalPages: number;
+  totalItems: number;
+  perPage: number;
 };
 
 export const useGetQuotes = () => {
@@ -44,9 +46,9 @@ export const useGetQuotes = () => {
     }
 
     // Check network connectivity
-    const netInfo = await fetchNetInfo();
+    const {isConnected, isInternetReachable} = await fetchNetInfo();
 
-    if (netInfo.isConnected) {
+    if (isConnected && isInternetReachable) {
       const controller = new AbortController();
       try {
         // Fetch from server when online
@@ -67,7 +69,9 @@ export const useGetQuotes = () => {
         return {
           pageNumber: data.page,
           quotes: data.items,
-          totalPages: data.totalPages
+          totalPages: data.totalPages,
+          totalItems: data.totalItems,
+          perPage: data.perPage
         };
       } catch (error) {
         if ((error as Error).name === 'AbortError') {
@@ -92,7 +96,9 @@ export const useGetQuotes = () => {
       return {
         pageNumber: 1, // Default to first page for offline data
         quotes: offlineQuote,
-        totalPages: 1 // Assume single page for offline data
+        totalPages: 1, // Assume single page for offline data
+        totalItems: offlineQuote.length,
+        perPage: offlineQuote.length
       };
     }
   }, []);
