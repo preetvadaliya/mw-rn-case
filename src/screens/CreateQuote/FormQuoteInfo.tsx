@@ -13,30 +13,26 @@
 import { Select } from '@devrue/rn-select';
 import { FormikTextInput } from '@src/components';
 import { useField, useFormikContext } from 'formik';
-import { Text, View } from 'react-native';
-import { styles } from './style';
+import { StyleSheet, Text, View } from 'react-native';
 
 export const FormQuoteInfo: React.FC = () => {
   const [field, meta] = useField('status');
   const { setFieldValue, setFieldTouched } = useFormikContext();
+
   return (
     <View style={styles.section}>
       {/* Section Title: Display the section heading for "Quote Information" */}
       <Text style={styles.sectionTitle}>Quote Information</Text>
-
-      {/* Description Input Field: Formik-managed text input for entering the quote description */}
       <FormikTextInput
-        fieldName='description' // Formik field name to bind the input value
-        label='Description' // Label displayed above the input field
-        containerProps={{ style: styles.fieldMargin }} // Extra styling for spacing around the input field
+        fieldName='description'
+        label='Description'
+        containerProps={{ style: styles.fieldMargin }}
       />
       <Text
-        style={{
-          fontWeight: 'bold',
-          fontSize: 14,
-          marginBottom: 8,
-          color: meta.error && meta.touched ? 'red' : 'black'
-        }}
+        style={[
+          styles.label,
+          meta.touched && meta.error ? styles.errorLabel : styles.defaultLabel
+        ]}
       >
         Status
       </Text>
@@ -54,18 +50,40 @@ export const FormQuoteInfo: React.FC = () => {
           setFieldValue('status', value);
         }}
       />
-      {meta.touched && meta.error ? (
-        <Text
-          style={{
-            color: 'red',
-            fontSize: 12,
-            fontWeight: 'light',
-            marginTop: 8
-          }}
-        >
-          {meta.error}
-        </Text>
+      {meta.error && meta.touched ? (
+        <Text style={styles.errorMessage}>{meta.error}</Text>
       ) : null}
     </View>
   );
 };
+
+// Styles
+const styles = StyleSheet.create({
+  section: {
+    marginBottom: 16
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 12
+  },
+  fieldMargin: {
+    marginBottom: 16
+  },
+  label: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    marginBottom: 8
+  },
+  defaultLabel: {
+    color: 'black'
+  },
+  errorLabel: {
+    color: 'red'
+  },
+  errorMessage: {
+    color: 'red',
+    fontSize: 12,
+    marginTop: 8
+  }
+});
