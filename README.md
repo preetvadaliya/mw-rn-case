@@ -18,14 +18,17 @@ This is a sample repository containing the coding test code for Meisterwerk. It 
 
 2. Note: There is no environment setup required. Server URLs are hardcoded to reduce the setup time. In the future, these could be configured using `expo-constants` or `dotenv` for different environments such as local and production.
 
-3. Once you have cloned the repository, navigate to the project folder and run the following commands:
+3. Users are explicitly reminded to start the dummy server before running the app.
+
+4. Once you have cloned the repository, navigate to the project folder and run the following commands:
    ```bash
    cd mw-rn-case
    npm install
    npm run start
    ```
 
-That's it! The app should now be running.
+That's it! The app should now be running. I have tested the application thoroughly on the iOS simulator, as I currently do not have access to an Android system. I hope the application performs as expected on Android devices as well.
+
 
 ---
 
