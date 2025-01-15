@@ -10,7 +10,7 @@ export const Home: React.FC = () => {
     <View style={styles.container}>
       <Button
         title='View Quotes'
-        onPress={() => navigate(Screens.LIST_QUOTES, { pageId: 1 })}
+        onPress={() => navigate(Screens.LIST_QUOTES)}
       />
       <Button
         title='Create Quote'
