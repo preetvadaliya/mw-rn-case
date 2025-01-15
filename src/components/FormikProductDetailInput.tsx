@@ -13,7 +13,7 @@
  * <FormikProductDetailInput fieldName="productDetails" items={productList} />
  */
 
-import { Picker } from '@react-native-picker/picker';
+import { Select } from '@devrue/rn-select';
 import type { Product } from '@src/types';
 import { useField, useFormikContext } from 'formik';
 import type React from 'react';
@@ -56,24 +56,17 @@ export const FormikProductDetailInput: React.FC<FormikItemInputProps> = (
 
   return (
     <View style={{ marginBottom: 16, flexDirection: 'column', gap: 12 }}>
-      {/* Product selection dropdown */}
-      <Picker
-        selectedValue={field?.value?.product_name} // Bind selected product name to form state
-        onValueChange={async (itemValue, itemIndex) => {
-          // Update product name and corresponding price when a product is selected
-          await setFieldValue(`${fieldName}.product_name`, itemValue);
-          await setFieldValue(`${fieldName}.price`, items[itemIndex].price);
+      <Select
+        options={items.map((item) => [item.title, item.title])}
+        value={field?.value?.product_name}
+        onChangeValue={async (value: string) => {
+          await setFieldValue(`${fieldName}.product_name`, value);
+          await setFieldValue(
+            `${fieldName}.price`,
+            items.find((item) => item.title === value)?.price
+          );
         }}
-        enabled={!isSubmitting} // Disable dropdown while form is submitting
-        numberOfLines={1}
-        placeholder='Select a product'
-      >
-        {items.map((item) => (
-          // Render each product as an option in the dropdown
-          <Picker.Item key={item.title} label={item.title} value={item.title} />
-        ))}
-      </Picker>
-
+      />
       {/* Input fields for price, quantity, and subtotal */}
       <View
         style={{
