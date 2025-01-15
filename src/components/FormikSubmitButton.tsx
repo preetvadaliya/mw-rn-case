@@ -53,5 +53,12 @@ export const FormikSubmitButton: React.FC<ButtonProps> = (props) => {
   }, [setSubmitting, submitForm, resetForm, validateForm]); // Dependencies ensure memoization
 
   // Render the Button component with the custom onSubmit handler
-  return <Button {...props} disabled={isSubmitting} onPress={onSubmit} />;
+  return (
+    <Button
+      {...props}
+      disabled={isSubmitting}
+      onPress={onSubmit}
+      testID='FormikSubmitButton'
+    />
+  );
 };

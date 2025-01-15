@@ -117,6 +117,7 @@ export const FormikTextInput: React.FC<FormikTextInputProps> = (props) => {
       {/* Text input field */}
       <TextInput
         {...inputProps}
+        testID='FormikTextInput.Input'
         style={[
           {
             borderWidth: 1,
