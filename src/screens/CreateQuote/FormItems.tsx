@@ -52,7 +52,7 @@ export const FormItems: React.FC = () => {
   };
 
   return (
-    <View style={styles.section}>
+    <View>
       <View
         style={{
           flexDirection: 'row',
@@ -61,24 +61,22 @@ export const FormItems: React.FC = () => {
         }}
       >
         {/* Title and error display for 'Item Information' section */}
-        <View style={{ flexDirection: 'column', gap: 1 }}>
+        <View style={{ flexDirection: 'column' }}>
           <Text style={styles.sectionTitle}>Item Information</Text>
-          {/* Display validation error if 'items' field has been touched and contains an error */}
-          {meta.error && meta.touched ? (
+          {meta.error && meta.touched && typeof meta.error === 'string' ? (
             <Text style={{ color: 'red', fontSize: 12 }}>
               {meta.error.toString()}
             </Text>
           ) : null}
         </View>
-
         {/* Add Item button */}
         <TouchableOpacity
           style={{
             padding: 4,
             backgroundColor: 'blue',
             borderRadius: 9999,
-            height: 28,
-            width: 28,
+            height: 24,
+            width: 24,
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'center'
@@ -86,42 +84,54 @@ export const FormItems: React.FC = () => {
           onPress={addItem} // Trigger addItem when clicked
           disabled={isLoading} // Disable the button when products are still loading
         >
-          <Text style={{ fontWeight: 'bold', fontSize: 16, color: 'white' }}>
+          <Text style={{ fontWeight: 'bold', fontSize: 14, color: 'white' }}>
             +
           </Text>
         </TouchableOpacity>
       </View>
-
       {/* Map over 'items' and render each item using FormikProductDetailInput */}
       {values.items.map((_, index) => {
         return (
-          <View key={index.toString()} style={{ marginBottom: 16 }}>
+          <View
+            key={index.toString()}
+            style={{ flexDirection: 'column', gap: 12 }}
+          >
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                alignItems: 'center'
+              }}
+            >
+              <Text style={{ fontWeight: 'bold', fontSize: 14 }}>
+                Item {index + 1}
+              </Text>
+              <TouchableOpacity
+                style={{
+                  padding: 4,
+                  backgroundColor: 'red',
+                  borderRadius: 9999,
+                  height: 24,
+                  width: 24,
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center'
+                }}
+                onPress={() => removeItem(index)} // Trigger removeItem for the specific index
+              >
+                <Text
+                  style={{ fontWeight: 'bold', fontSize: 14, color: 'white' }}
+                >
+                  -
+                </Text>
+              </TouchableOpacity>
+            </View>
             {/* Render product details form for each item in the list */}
             <FormikProductDetailInput
               key={index.toString()} // Ensure unique key for each rendered input
               fieldName={`items.${index}`} // Bind each input field to its respective item in Formik state
               items={items} // Provide the list of available products to populate the dropdown
             />
-            {/* Remove Item button */}
-            <TouchableOpacity
-              style={{
-                padding: 4,
-                backgroundColor: 'red',
-                borderRadius: 9999,
-                height: 28,
-                width: 28,
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center'
-              }}
-              onPress={() => removeItem(index)} // Trigger removeItem for the specific index
-            >
-              <Text
-                style={{ fontWeight: 'bold', fontSize: 16, color: 'white' }}
-              >
-                -
-              </Text>
-            </TouchableOpacity>
           </View>
         );
       })}

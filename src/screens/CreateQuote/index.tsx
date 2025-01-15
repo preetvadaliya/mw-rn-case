@@ -75,6 +75,7 @@ export const CreateQuote: React.FC = () => {
       phone: number().typeError('Invalid phone').required('Phone is required')
     }),
     description: string().optional(),
+    status: string().required('Status is required'),
     items: array()
       .of(
         object({

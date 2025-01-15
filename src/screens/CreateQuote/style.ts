@@ -7,7 +7,7 @@ export const styles = StyleSheet.create({
     backgroundColor: '#fff'
   },
   section: {
-    marginBottom: 24
+    marginVertical: 12
   },
   sectionTitle: {
     fontWeight: 'bold',
