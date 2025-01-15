@@ -66,6 +66,7 @@ export const FormikProductDetailInput: React.FC<FormikItemInputProps> = (
             items.find((item) => item.title === value)?.price
           );
         }}
+        disabled={isSubmitting}
       />
       {/* Input fields for price, quantity, and subtotal */}
       <View
